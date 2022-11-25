@@ -1,5 +1,6 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable react/prop-types */
+import { Row, Button } from "antd";
 import React, { useEffect } from "react";
 // import propTypes from "prop-types";
 // import classnames from "classnames";
@@ -11,14 +12,12 @@ import { remote_control } from "./RemoteControl";
 
 export default function MonitorPage(props) {
 
-  useEffect(() => {
-    remote_control();
-  }, []);
-
   return (
-    <div>
-      {null}
-    </div>
+    <Row style={{ height: "100%" }} justify="center" align="middle">
+      <Button size="large" type="primary" onClick={remote_control}>
+        设置遥控
+      </Button>
+    </Row>
   )
 };
 

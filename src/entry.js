@@ -18,9 +18,9 @@ import "@/global.less";
 export default () => (
   <Routes>
     <Route path="/" element={(<BasicLayout />)}>
+      <Route path="/" element={(<MonitorPage />)} />
       <Route path="/map" element={(<AmapPage />)} />
       <Route path="/banner" element={(<SwiperPage />)} />
-      <Route path="/monitor" element={(<MonitorPage />)} />
     </Route>
   </Routes>
 );

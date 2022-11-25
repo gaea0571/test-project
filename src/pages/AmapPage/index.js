@@ -43,11 +43,15 @@ export default function AmapPage() {
       });
       const map = new AMap.Map(element.current);
 
-      const marker = new AMap.Marker({
+      const marker1 = new AMap.Marker({
         map,
         position: [116.481181, 39.989792]
       });
 
+      const marker2 = new AMap.Marker({
+        map,
+        position: [120, 39.989792]
+      });
 
       const infoWindow = new AMap.InfoWindow({
         isCustom: true,  // 使用自定义窗体
@@ -55,10 +59,13 @@ export default function AmapPage() {
         offset: new AMap.Pixel(16, -45)
       });
 
-      marker.on("click", () => {
-        infoWindow.open(map, marker.getPosition());
+      marker1.on("click", () => {
+        infoWindow.open(map, marker1.getPosition());
       });
 
+      marker2.on("click", () => {
+        infoWindow.open(map, marker2.getPosition());
+      });
     })();
   }, []);
 
