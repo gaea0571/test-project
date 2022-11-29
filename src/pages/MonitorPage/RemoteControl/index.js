@@ -5,7 +5,7 @@ import React, { useState, useCallback } from "react";
 import ControlForm from "./forms/ControlForm";
 
 export function RemoteControl(props) {
-  const { onAction, afterClose } = props;
+  const { dcuId, meterId, pointId, controlType, command, onAction, afterClose } = props;
 
   const [status, set_status] = useState(true);
 
@@ -24,7 +24,15 @@ export function RemoteControl(props) {
       onCancel={() => handleAction(false)}
       afterClose={afterClose}
     >
-      <ControlForm onAction={handleAction} />
+      <ControlForm
+        timeout={10}
+        dcuId={dcuId}
+        command={command}
+        meterId={meterId}
+        pointId={pointId}
+        controlType={controlType}
+        onAction={handleAction}
+      />
     </Modal>
   )
 };
@@ -35,7 +43,9 @@ RemoteControl.defaultProps = {
 };
 
 
-export function remote_control() {
+export function RemoteControlDialog(params) {
+  const { dcuId, meterId, pointId, controlType, command } = params;
+
   const mount_container = document.createElement("div");
   document.body.appendChild(mount_container);
 
@@ -51,6 +61,11 @@ export function remote_control() {
 
       ReactDOM.render((
         <RemoteControl
+          dcuId={dcuId}
+          command={command}
+          meterId={meterId}
+          pointId={pointId}
+          controlType={controlType}
           onAction={resolve}
           afterClose={afterClose}
         />

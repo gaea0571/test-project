@@ -8,9 +8,10 @@ import BasicLayout from "@/layouts/basic_layouts";
 // import IndexPage from "@/pages/IndexPage";
 // import SoundPage from "@/pages/SoundPage";
 
-import SwiperPage from "@/pages/SwiperPage";
 import AmapPage from "@/pages/AmapPage";
+import SwiperPage from "@/pages/SwiperPage";
 import MonitorPage from "@/pages/MonitorPage";
+import RsaCryptoPage from "@/pages/RsaCryptoPage";
 
 import "@/global.less";
 
@@ -20,6 +21,7 @@ export default () => (
     <Route path="/" element={(<BasicLayout />)}>
       <Route path="/" element={(<MonitorPage />)} />
       <Route path="/map" element={(<AmapPage />)} />
+      <Route path="/ras" element={(<RsaCryptoPage />)} />
       <Route path="/banner" element={(<SwiperPage />)} />
     </Route>
   </Routes>

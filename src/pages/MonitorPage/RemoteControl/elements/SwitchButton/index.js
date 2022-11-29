@@ -9,12 +9,12 @@ import React, { useMemo, useState } from "react";
 import css from "./style.css";
 
 export default function SwitchButton(props) {
-  const { status } = props;
+  const { value } = props;
 
   const button_class = useMemo(() => classnames({
     [css.button]: true,
-    [css.active]: status
-  }), [status]);
+    [css.active]: value
+  }), [value]);
 
   return (
     <div style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>

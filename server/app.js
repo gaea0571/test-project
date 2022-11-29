@@ -1,3 +1,5 @@
+/* eslint-disable global-require */
+/* eslint-disable array-callback-return */
 /* eslint-disable import/no-extraneous-dependencies */
 const fs = require("fs");
 const Koa = require("koa");
@@ -5,10 +7,9 @@ const path = require("path");
 const http = require("http");
 const https = require("https");
 const proxy = require("koa-proxies");
-const static = require("koa-static");
 const { promisify } = require("util");
+const koaStatic = require("koa-static");
 const cookieParser = require("koa-cookie");
-
 const render = require("./middlewares/render");
 const index_page = require("./routers/index_page");
 
@@ -22,21 +23,21 @@ const static_cache_config = {
   const app = new Koa();
 
   app.use(async (context, next) => {
-    context.set("Permissions-Policy", 'autoplay=(self "https://localhost:8190/")');
+    context.set("Permissions-Policy", `autoplay=(self "https://localhost:8190/")`);
     await next();
   });
 
-  app.use(static(path.resolve(__dirname, "../assets/"), {
+  app.use(koaStatic(path.resolve(__dirname, "../assets/"), {
     index: false,
     maxage: static_cache_config[process.env.CHIMERA_RUNTIME]
   }));
 
-  app.use(static(path.resolve(__dirname, "../public/"), {
+  app.use(koaStatic(path.resolve(__dirname, "../public/"), {
     index: false,
     maxage: static_cache_config[process.env.CHIMERA_RUNTIME]
   }));
 
-  /** 本地开发模式需要代理 **/
+  /** 本地开发模式需要代理 * */
   if (process.env.CHIMERA_RUNTIME === "local") {
     const proxy_list = require("../configs/proxy_list");
     Object.keys(proxy_list).map((current_proxy_path) => {

@@ -8,13 +8,21 @@ import React, { useEffect } from "react";
 // import css from "./style.scss";
 // import css from "./style.less";
 
-import { remote_control } from "./RemoteControl";
+import { RemoteControlDialog } from "./RemoteControl";
+
+const demo_params_data = {
+  dcuId: "0x12345678",
+  meterId: "0x6b3a00010001",
+  pointId: "0x70000001",
+  controlType: "single",
+  command: "on"
+};
 
 export default function MonitorPage(props) {
 
   return (
     <Row style={{ height: "100%" }} justify="center" align="middle">
-      <Button size="large" type="primary" onClick={remote_control}>
+      <Button size="large" type="primary" onClick={() => RemoteControlDialog(demo_params_data)}>
         设置遥控
       </Button>
     </Row>
@@ -24,9 +32,8 @@ export default function MonitorPage(props) {
 
 MonitorPage.propTypes = {
 
-
 };
-MonitorPage.defaultProps = {
 
+MonitorPage.defaultProps = {
 
 };

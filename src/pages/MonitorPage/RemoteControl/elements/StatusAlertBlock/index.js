@@ -24,9 +24,9 @@ const off_alarm_message_enums = {
 export function useAlarmStatus() {
   const namespace_ref = useRef();
 
-  const [action_status, set_action_status] = useState(false);
-
   const [error_message, set_error_message] = useState("");
+
+  const [action_status, set_action_status] = useState(false);
 
   const status_text = useMemo(() => {
     if (action_status) {
@@ -63,15 +63,14 @@ export function useAlarmStatus() {
 };
 
 
-
 export function StatusAlertBlock(props) {
 
-  const { action_status, status_text, error_message } = props;
+  const { showtime, action_status, status_text, error_message } = props;
 
   if (action_status) {
     if (action_status === "PEDDING") {
       return (
-        <Spin style={{ background: "white" }} tip={status_text}>
+        <Spin style={{ background: "white" }} tip={`${status_text} (${showtime})s`}>
           <Skeleton title="100%" active />
         </Spin>
       )
@@ -96,9 +95,11 @@ export function StatusAlertBlock(props) {
 
 StatusAlertBlock.propTypes = {
 
-
 };
+
 StatusAlertBlock.defaultProps = {
-
-
+  showtime: 0,
+  action_status: "PEDDING",
+  status_text: "",
+  error_message: ""
 };
