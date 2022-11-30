@@ -3,6 +3,7 @@
 import moment from "moment";
 import classnames from "classnames";
 import React, { useMemo } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Row, Col, Avatar, Divider, Space } from "antd";
 // import propTypes from "prop-types";
 // import classnames from "classnames";
@@ -13,9 +14,11 @@ import css from "./style.less";
 export default function MessageBlock(props) {
   const { user_id, style, className, content } = props;
 
+  const [search_params] = useSearchParams();
+
   const computed_style = useMemo(() => ({ ...style, width: "100%" }), [style]);
 
-  const is_current_user = useMemo(() => user_id === 1, [user_id]);
+  const is_current_user = useMemo(() => user_id === search_params.get("user_id"), [user_id, search_params]);
 
   const computed_class = useMemo(() => classnames({
     [css.is_current_user]: is_current_user,

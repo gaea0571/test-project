@@ -1,8 +1,10 @@
 /* eslint-disable react/no-array-index-key */
 /* eslint-disable no-unused-vars */
 /* eslint-disable react/prop-types */
+import io from "socket.io-client";
 import { Button, Input } from "antd";
-import React, { useState, useEffect, useCallback } from "react";
+import { useSearchParams } from "react-router-dom";
+import React, { useRef, useState, useEffect, useCallback } from "react";
 
 
 // import propTypes from "prop-types";
@@ -16,56 +18,47 @@ import ScrollContainer from "./elements/ScrollContainer";
 // import css from "./style.scss";
 // import css from "./style.less";
 
-const mock_message = [{
-  content: "test-message345345345345354353453543风格的风格和打开对话框的风格的风格的和jahjshjdhjsahdjhajdhjksahdahjksdhasjkd", userid: 1
-}, {
-  content: "test-message345345345345354353453543风格的风格和打开对话框的风格的风格的和", userid: 2
-}, {
-  content: "test-message345345345345354353453543风格的风格和打开对话框的风格的风格的和jahjshjdhjsahdjhajdhjksahdahjksdhasjkd", userid: 1
-}, {
-  content: "test-message345345345345354353453543风格的风格和打开对话框的风格的风格的和jahjshjdhjsahdjhajdhjksahdahjksdhasjkd", userid: 1
-}, {
-  content: "test-message345345345345354353453543风格的风格和打开对话框的风格的风格的和jahjshjdhjsahdjhajdhjksahdahjksdhasjkd", userid: 1
-}, {
-  content: "test-message", userid: 1
-}, {
-  content: "test-message", userid: 2
-}, {
-  content: "test-message", userid: 2
-}, {
-  content: "test-message", userid: 2
-}, {
-  content: "test-message", userid: 2
-}, {
-  content: "test-message", userid: 2
-}, {
-  content: "test-message", userid: 2
-}, {
-  content: "test-message", userid: 2
-}, {
-  content: "test-message", userid: 2
-}];
-
 export default function RsaCryptoPage(props) {
+
+  const socket = useRef();
+
+  const [search_params] = useSearchParams();
 
   const [message, set_message] = useState("");
 
   const [message_list, set_message_list] = useState([]);
 
   useEffect(() => {
+    const room_id = search_params.get("room_id");
+    const user_id = search_params.get("user_id");
+    socket.current = io(`ws://localhost:13500?room_id=${room_id}&user_id=${user_id}`);
+  }, [search_params]);
 
-  }, []);
+  useEffect(() => {
+    socket.current.on("connect", () => {
+      console.log("已连接");
+    });
+    socket.current.on("load_record", (records) => {
+      set_message_list(records);
+    });
+    socket.current.on("message", (content) => {
+      const json_content = JSON.parse(content);
+      set_message_list((message_list) => {
+        const clone_message_list = [...message_list];
+        return [...clone_message_list, json_content];
+      });
+    });
+  }, [search_params]);
 
   const handlePublish = useCallback(async () => {
-    const clone_message_list = [...message_list];
-    clone_message_list.push({ content: message, user_id: 1 });
-    set_message_list(clone_message_list);
-  }, [message, message_list]);
+    const user_id = search_params.get("user_id");
+    socket.current.emit("emit_message", JSON.stringify({ content: message, user_id }));
+  }, [message, search_params]);
 
   return (
     <ScrollContainer message_list={message_list}>
-      {message_list.map(({ content, userid }, index) => (
-        <MessageBlock key={index} content={content} user_id={userid} />
+      {message_list.map(({ content, user_id }, index) => (
+        <MessageBlock key={index} content={content} user_id={user_id} />
       ))}
       <StickyBlock>
         <Input.Group compact>
