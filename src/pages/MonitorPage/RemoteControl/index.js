@@ -65,9 +65,9 @@ export function RemoteControlDialog(params) {
           command={command}
           meterId={meterId}
           pointId={pointId}
-          controlType={controlType}
           onAction={resolve}
           afterClose={afterClose}
+          controlType={controlType}
         />
       ), mount_container);
     } catch (error) {
