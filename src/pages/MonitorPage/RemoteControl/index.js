@@ -82,16 +82,17 @@ export function withRemoteControlDialog(SourceComponent) {
 
   function listen(callback) {
     eventbus.on("on_alarm", callback);
-    eventbus.on("off_alarm", callback);
-    return () => {
-      eventbus.removeAllListeners(["on_alarm"]);
-      eventbus.removeAllListeners(["off_alarm"]);
-    };
+    eventbus.on("off_alarm", callback)
+  };
+
+  function unlisten() {
+    eventbus.removeAllListeners(["on_alarm"]);
+    eventbus.removeAllListeners(["off_alarm"]);
   };
 
   function TargetComponent(props, ref) {
     return (
-      <SourceComponent ref={ref} {...props} RemoteControlDialog={{ open: handleOpenDialog, listen }} />
+      <SourceComponent ref={ref} {...props} RemoteControlDialog={{ open: handleOpenDialog, listen, unlisten }} />
     )
   };
 

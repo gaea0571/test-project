@@ -23,10 +23,10 @@ const MonitorPage = withRemoteControlDialog((props) => {
   const { RemoteControlDialog } = props;
 
   useEffect(() => {
-    const unlisten = RemoteControlDialog.listen((params) => {
+    RemoteControlDialog.listen((params) => {
       console.log(params);
     });
-    return () => unlisten();
+    return () => RemoteControlDialog.unlisten();
   }, [RemoteControlDialog]);
 
   const handleClick = useCallback(async () => {
