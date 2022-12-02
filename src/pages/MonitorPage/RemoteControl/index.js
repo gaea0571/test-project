@@ -1,28 +1,35 @@
+/* eslint-disable react/jsx-props-no-spreading */
 import { Modal } from "antd";
 import ReactDOM from "react-dom";
-import React, { useState, useCallback } from "react";
+import { EventEmitter } from "events";
+import React, { useState, useEffect } from "react";
+import hoistNonReactStatics from "hoist-non-react-statics";
 
 import ControlForm from "./forms/ControlForm";
 
 export function RemoteControl(props) {
-  const { dcuId, meterId, pointId, controlType, command, onAction, afterClose } = props;
+  const { dcuId, meterId, pointId, controlType, command, eventbus, onAction, afterClose } = props;
 
   const [status, set_status] = useState(true);
 
-  const handleAction = useCallback((action_values) => {
-    onAction(action_values);
-    set_status(false);
-  }, [onAction]);
+  useEffect(() => {
+    eventbus.on("cancel", () => {
+      set_status(false);
+    });
+    return () => {
+      eventbus.removeAllListeners(["cancel"]);
+    };
+  }, [eventbus]);
 
   return (
     <Modal
       title="遥控"
-      width="900px"
+      width="600px"
       open={status}
       footer={null}
       maskClosable={false}
-      onCancel={() => handleAction(false)}
       afterClose={afterClose}
+      onCancel={() => set_status(false)}
     >
       <ControlForm
         timeout={10}
@@ -31,7 +38,8 @@ export function RemoteControl(props) {
         meterId={meterId}
         pointId={pointId}
         controlType={controlType}
-        onAction={handleAction}
+        onAction={onAction}
+        onCancel={() => set_status(false)}
       />
     </Modal>
   )
@@ -43,37 +51,50 @@ RemoteControl.defaultProps = {
 };
 
 
-export function RemoteControlDialog(params) {
-  const { dcuId, meterId, pointId, controlType, command } = params;
+export function withRemoteControlDialog(SourceComponent) {
 
-  const mount_container = document.createElement("div");
-  document.body.appendChild(mount_container);
+  let mount_container;
 
-  return new Promise((resolve, reject) => {
+  const eventbus = new EventEmitter();
 
-    try {
+  const handleAfterClose = () => {
+    ReactDOM.unmountComponentAtNode(mount_container);
+    mount_container.parentNode.removeChild(mount_container);
+  };
 
-      const afterClose = () => {
-        ReactDOM.unmountComponentAtNode(mount_container);
-        mount_container.parentNode.removeChild(mount_container);
-        resolve(false);
-      };
+  function handleOpenDialog(params) {
+    const { dcuId, meterId, pointId, controlType, command } = params || {};
+    mount_container = document.createElement("div");
+    document.body.appendChild(mount_container);
+    ReactDOM.render((
+      <RemoteControl
+        dcuId={dcuId}
+        command={command}
+        meterId={meterId}
+        pointId={pointId}
+        eventbus={eventbus}
+        controlType={controlType}
+        afterClose={handleAfterClose}
+        onAction={({ type, result }) => eventbus.emit(type, { type, result })}
+      />
+    ), mount_container);
+  };
 
-      ReactDOM.render((
-        <RemoteControl
-          dcuId={dcuId}
-          command={command}
-          meterId={meterId}
-          pointId={pointId}
-          onAction={resolve}
-          afterClose={afterClose}
-          controlType={controlType}
-        />
-      ), mount_container);
-    } catch (error) {
-      reject(error);
+  function listen(callback) {
+    eventbus.on("on_alarm", callback);
+    eventbus.on("off_alarm", callback);
+    return () => {
+      eventbus.removeAllListeners(["on_alarm"]);
+      eventbus.removeAllListeners(["off_alarm"]);
     };
+  };
 
-  });
+  function TargetComponent(props, ref) {
+    return (
+      <SourceComponent ref={ref} {...props} RemoteControlDialog={{ open: handleOpenDialog, listen }} />
+    )
+  };
 
+  hoistNonReactStatics(SourceComponent, TargetComponent);
+  return React.forwardRef(TargetComponent);
 };

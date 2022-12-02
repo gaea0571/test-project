@@ -33,40 +33,42 @@ export default function ControlForm(props) {
 
   const [showtime, handleRemoteControl] = useExecuteRemoteControl();
 
-  const { dcuId, meterId, pointId, controlType, command, timeout, onAction } = props;
+  const { dcuId, meterId, pointId, controlType, command, timeout, onAction, onCancel } = props;
 
   const [{ action_status, status_text, error_message }, { loading, success, faild }] = useAlarmStatus();
 
   /** 合闸句柄 * */
   const handleOnAlarm = useCallback(async () => {
     try {
-      form.setFieldValue("command", false);
-      loading("on_alarm");
+      await form.setFieldValue("command", true);
+      await loading("on_alarm");
       const result = await form.validateFields();
       await handleRemoteControl({ timeout, params: result });
-      form.setFieldValue("command", true);
-      success("on_alarm");
+      await success("on_alarm");
+      await onAction({ type: "on_alarm", result });
     } catch (error) {
       faild("on_alarm", JSON.stringify(error));
+      await form.setFieldValue("command", false);
     };
-  }, [form, timeout, loading, success, faild, handleRemoteControl]);
+  }, [form, timeout, loading, success, faild, handleRemoteControl, onAction]);
 
   /** 分闸句柄 * */
   const handleOffAlarm = useCallback(async () => {
     try {
-      form.setFieldValue("command", false);
-      loading("off_alarm");
+      await form.setFieldValue("command", false);
+      await loading("off_alarm");
       const result = await form.validateFields();
       await handleRemoteControl({ timeout, params: result });
-      form.setFieldValue("command", false);
-      success("off_alarm");
+      await success("off_alarm");
+      await onAction({ type: "off_alarm", result });
     } catch (error) {
       faild("off_alarm", JSON.stringify(error.message));
+      await form.setFieldValue("command", true);
     };
-  }, [form, timeout, loading, success, faild, handleRemoteControl]);
+  }, [form, timeout, loading, success, faild, handleRemoteControl, onAction]);
 
   const handleCancel = useCallback(async () => {
-    onAction(false);
+    await onAction({ type: "cancel" });
   }, [onAction]);
 
   return (
@@ -74,7 +76,7 @@ export default function ControlForm(props) {
       <Space direction="vertical" style={{ width: "100%" }} split={(<Divider plain>信息行</Divider>)}>
         <Form {...form_config} form={form} initialValues={{ dcuId, meterId, pointId, controlType, command }}>
           <Row gutter={20} justify="space-between">
-            <Col flex="500px">
+            <Col flex="auto">
               <Form.Item label="终端" name="dcuId">
                 <Input style={{ width: "100%" }} placeholder="请输入DCU编号-名称" />
               </Form.Item>
@@ -88,7 +90,7 @@ export default function ControlForm(props) {
                 <Select style={{ width: "100%" }} placeholder="请选择遥控类型" options={control_type_enums} />
               </Form.Item>
             </Col>
-            <Col flex="auto">
+            <Col flex="200px">
               <Form.Item name="command">
                 <SwitchButton />
               </Form.Item>
@@ -122,5 +124,6 @@ ControlForm.propTypes = {
 
 ControlForm.defaultProps = {
   timeout: 10,
-  onAction() { }
+  onAction() { },
+  onCancel() { }
 };

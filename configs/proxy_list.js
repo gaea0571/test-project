@@ -7,5 +7,9 @@ module.exports = {
   "/executeRemoteControl": {
     target: "http://localhost:7152/",
     changeOrigin: true
+  },
+  "/getOperationStatus": {
+    target: "http://localhost:7152/",
+    changeOrigin: true
   }
 };

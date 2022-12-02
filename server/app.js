@@ -8,8 +8,6 @@ const koaStatic = require("koa-static");
 const cookieParser = require("koa-cookie");
 const bodyParser = require("koa-bodyparser");
 
-const io = require("./socket");
-
 const index_page = require("./routers/index_page");
 const login_page = require("./routers/login_page");
 
@@ -20,25 +18,6 @@ const static_cache_config = {
 };
 
 const app = new Koa();
-
-const room_records = {};
-
-io.on("connection", (socket) => {
-  const { room_id, user_id } = (socket.handshake.query);
-  if (room_records[room_id]) {
-    socket.emit("load_record", room_records[room_id]);
-  } else {
-    room_records[room_id] = [];
-  };
-  socket.on("emit_message", (params) => {
-    socket.emit("message", params);
-    socket.broadcast.emit("message", params);
-    room_records[room_id].push(JSON.parse(params));
-  });
-  socket.on("disconnect", () => {
-    socket.broadcast.emit("leave", JSON.stringify({ user_id }));
-  });
-});
 
 app.use(async (context, next) => {
   context.set("Permissions-Policy", `autoplay=(self "https://localhost:8190/")`);
@@ -68,8 +47,8 @@ app.use(cookieParser.default());
 app.use(login_page);
 app.use(index_page);
 
-app.listen(8090, () => {
-  console.log("server is runing 8090");
+app.listen(18090, () => {
+  console.log("server is runing 18090");
 });
 
 // http.createServer(app.callback()).listen(8090);
