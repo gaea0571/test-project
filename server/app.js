@@ -3,8 +3,10 @@
 /* eslint-disable import/no-extraneous-dependencies */
 const Koa = require("koa");
 const path = require("path");
+const Redis = require("ioredis");
 const proxy = require("koa-proxies");
 const koaStatic = require("koa-static");
+const { readFile } = require("jsonfile");
 const cookieParser = require("koa-cookie");
 const bodyParser = require("koa-bodyparser");
 
@@ -18,6 +20,22 @@ const static_cache_config = {
 };
 
 const app = new Koa();
+
+const cache_data = new Redis({
+  port: 26379,
+  host: "0.0.0.0",
+  keyPrefix: "room:"
+});
+
+(async () => {
+  const cache_data_path = path.resolve(__dirname, "../cache/cache.json");
+  const result = await readFile(cache_data_path);
+  await cache_data.del("5");
+  result.map(async (element) => {
+    await cache_data.rpush("5", JSON.stringify(element));
+    await cache_data.expire("5", 60 * 60 * 24 * 30 * 1000);
+  });
+})();
 
 app.use(async (context, next) => {
   context.set("Permissions-Policy", `autoplay=(self "https://localhost:8190/")`);
